@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>스택 — 이론, 코드, 문제</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--card:#fff;--ink:#16202e;--mute:#5b6678;--line:#d5dbe5;--acc:#0f8b8d;--blk:#f2a541;--blkink:#3a2400;--ok:#1e8e4e;--bad:#c4382f;--code:#16202e;--codeink:#e6ebf3;--c1:#7f8da3;--c2:#f2a541;--c3:#6fd0c9;--c4:#ff9d8a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1520;--card:#18212f;--ink:#e8edf5;--mute:#98a3b6;--line:#2b3649;--acc:#4cc3c5;--code:#0b1018}}
+:root[data-theme="dark"]{--bg:#0f1520;--card:#18212f;--ink:#e8edf5;--mute:#98a3b6;--line:#2b3649;--acc:#4cc3c5;--code:#0b1018}
+html{scroll-behavior:smooth;scroll-padding-top:calc(60px + env(safe-area-inset-top,0px))}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 "Noto Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;-webkit-text-size-adjust:100%;word-break:keep-all}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:20}
+main{max-width:640px;margin:0 auto;padding:0 16px 48px}
+header.hero{padding:28px 0 8px}
+h1{font-size:2rem;line-height:1.2;margin:0 0 10px;font-weight:800;letter-spacing:-.02em}
+h2{font-size:1.45rem;margin:0 0 12px;font-weight:800}
+h3{font-size:1.05rem;margin:18px 0 6px}
+p{margin:0 0 12px}
+.lead{color:var(--mute);font-size:1.02rem}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--bg);display:flex;gap:8px;overflow-x:auto;padding:10px 16px;margin:0 -16px;border-bottom:1px solid var(--line);scrollbar-width:none}
+nav.tabs a{flex:none;padding:8px 14px;border-radius:99px;background:var(--card);border:1px solid var(--line);color:var(--ink);text-decoration:none;font-weight:600;font-size:.9rem}
+nav.tabs a:active{background:var(--acc);color:#fff}
+section{padding:28px 0 4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+.guide a.g{display:block;text-decoration:none;color:inherit;padding:14px 16px;border:1px solid var(--line);background:var(--card);border-radius:14px;margin-bottom:10px;border-left:6px solid var(--acc)}
+.guide a.g b{display:block;font-size:1.05rem}
+.guide a.g span{color:var(--mute);font-size:.92rem}
+.facts div{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:.95rem}
+.facts div:last-child{border:0}
+code,.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace}
+.pill{font-size:.85rem;background:var(--bg);border:1px solid var(--line);padding:2px 7px;border-radius:6px;white-space:nowrap}
+.viz{display:flex;gap:14px;align-items:stretch}
+.slots{flex:1;display:flex;flex-direction:column-reverse;gap:6px;min-height:290px}
+.slot{height:44px;border:2px dashed var(--line);border-radius:8px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;font-family:"JetBrains Mono",monospace;color:var(--mute);position:relative;transition:all .2s}
+.slot.full{border:2px solid var(--blk);background:var(--blk);color:var(--blkink);font-weight:600;font-size:1.1rem}
+.slot.top::after{content:"top";position:absolute;right:-8px;transform:translateX(100%);color:var(--acc);font-weight:600;font-size:.85rem}
+.slot small{font-size:.75rem;opacity:.8}
+.vside{width:120px;display:flex;flex-direction:column;gap:8px}
+.btn{font:inherit;font-weight:600;border:0;border-radius:10px;padding:12px;background:var(--acc);color:#fff;min-height:46px;cursor:pointer}
+.btn.alt{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.btn:focus-visible,a:focus-visible,.opt:focus-visible{outline:3px solid var(--blk);outline-offset:2px}
+.log{margin-top:12px;padding:10px 12px;background:var(--bg);border-radius:8px;font-size:.92rem;min-height:44px}
+.state{font-family:"JetBrains Mono",monospace;font-size:.85rem;color:var(--mute);margin-top:8px}
+.ctabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;scrollbar-width:none}
+.ctabs button{flex:none;font:inherit;font-size:.88rem;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer}
+.ctabs button[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+pre{margin:0 0 10px;background:var(--code);color:var(--codeink);padding:14px;border-radius:12px;overflow-x:auto;font:.82rem/1.55 "JetBrains Mono","Noto Sans KR",monospace;tab-size:2}
+.k{color:var(--c3)}.cm{color:var(--c1)}.n{color:var(--c2)}.s{color:var(--c4)}
+ul.pts{padding-left:20px;margin:0}
+ul.pts li{margin-bottom:6px}
+.q h3{margin-top:0}
+.opt{display:block;width:100%;text-align:left;font:inherit;padding:12px 14px;margin-top:8px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;min-height:46px}
+.opt.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.opt.no{background:var(--bad);border-color:var(--bad);color:#fff}
+.opt:disabled{cursor:default}
+.why{margin-top:10px;font-size:.92rem;color:var(--mute)}
+.qnum{font-size:.85rem;color:var(--mute);margin-bottom:4px}
+.big{font-size:3.4rem;font-weight:800;line-height:1}
+.bar{height:12px;border-radius:99px;background:var(--line);overflow:hidden;margin:12px 0}
+.bar i{display:block;height:100%;width:0;background:var(--acc);transition:width .4s}
+.dots{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.dots span{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);display:grid;place-items:center;font-size:.85rem;font-weight:600;color:var(--mute)}
+.dots .y{background:var(--ok);color:#fff;border-color:var(--ok)}.dots .x{background:var(--bad);color:#fff;border-color:var(--bad)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main>
+<header class="hero">
+  <h1>스택: 쌓아 올리는 자료구조</h1>
+  <p class="lead">C언어로 배우는 스택(Stack) 짧은 강의입니다. 이론, 직접 눌러 보는 모형, 코드 해설, 8개의 문제와 점수 계산까지 한 번에 확인하세요.</p>
+</header>
+<nav class="tabs" aria-label="목차">
+  <a href="#guide">길라잡이</a><a href="#theory">이론</a><a href="#demo">작동 원리</a><a href="#code">코드</a><a href="#tasks">문제</a><a href="#score">점수</a>
+</nav>
+
+<section id="guide" class="guide">
+  <h2>길라잡이</h2>
+  <p>위에서부터 차례로 읽거나, 원하는 곳으로 바로 이동하세요.</p>
+  <a class="g" href="#theory"><b>이론</b><span>스택이란 무엇인가, LIFO, 네 가지 기능</span></a>
+  <a class="g" href="#demo"><b>작동 원리</b><span>Push와 Pop을 눌러 top이 바뀌는 모습 확인</span></a>
+  <a class="g" href="#code"><b>코드 살펴보기</b><span>PDF의 전체 소스 코드와 함수별 해설</span></a>
+  <a class="g" href="#tasks"><b>문제 풀기</b><span>8문제, 선택하면 바로 채점</span></a>
+  <a class="g" href="#score"><b>점수 계산</b><span>총점, 백분율, 문제별 결과</span></a>
+</section>
+
+<section id="theory">
+  <h2>이론</h2>
+  <div class="card">
+    <p>스택(Stack)은 데이터를 쌓아 올리는 형태의 자료구조입니다. 접시를 쌓아 두면 가장 마지막에 올린 접시를 가장 먼저 꺼내듯, 가장 마지막에 들어간 데이터가 가장 먼저 나옵니다. 이를 <b>LIFO</b>(Last In First Out)라고 합니다.</p>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">네 가지 기능</h3>
+    <div class="facts">
+      <div><b>PUSH</b><span>데이터를 삽입</span></div>
+      <div><b>POP</b><span>맨 위 데이터를 삭제</span></div>
+      <div><b>PEEK</b><span>맨 위 데이터를 확인</span></div>
+      <div><b>DISPLAY</b><span>저장된 데이터를 출력</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">꼭 기억하기</h3>
+    <div class="facts">
+      <div><span>스택이 비어 있는 상태</span><code class="pill">top == -1</code></div>
+      <div><span>스택이 가득 찬 상태</span><code class="pill">top == SIZE - 1</code></div>
+      <div><span>SIZE가 5일 때 마지막 인덱스</span><code class="pill">4</code></div>
+      <div><span>데이터 저장 방식</span><code class="pill">LIFO</code></div>
+    </div>
+  </div>
+</section>
+
+<section id="demo">
+  <h2>작동 원리</h2>
+  <p>스택 크기는 5입니다. 변수 <code>top</code>은 가장 위에 있는 데이터의 인덱스를 가리킵니다.</p>
+  <div class="card">
+    <div class="viz">
+      <div class="slots" id="slots" aria-live="polite"></div>
+      <div class="vside">
+        <button class="btn" id="bpush">Push</button>
+        <button class="btn alt" id="bpop">Pop</button>
+        <button class="btn alt" id="bpeek">Peek</button>
+        <button class="btn alt" id="bdisp">Display</button>
+        <button class="btn alt" id="breset">초기화</button>
+      </div>
+    </div>
+    <div class="state" id="state"></div>
+    <div class="log" id="log">Push를 눌러 숫자를 넣어 보세요.</div>
+  </div>
+  <p style="color:var(--mute);font-size:.92rem">참고: Pop은 배열의 값을 실제로 지우지 않고 top의 위치만 감소시킵니다. 그 데이터는 더 이상 스택의 일부로 취급되지 않을 뿐입니다.</p>
+</section>
+
+<section id="code">
+  <h2>코드 살펴보기</h2>
+  <div class="ctabs" role="tablist" id="ctabs"></div>
+  <pre id="codebox"></pre>
+  <div class="card" id="codeinfo"></div>
+</section>
+
+<section id="tasks">
+  <h2>문제</h2>
+  <p>정답을 선택하세요. 정답 하나당 1점이며, 처음 선택한 답이 확정됩니다.</p>
+  <div id="quiz"></div>
+</section>
+
+<section id="score">
+  <h2>점수 계산</h2>
+  <div class="card">
+    <div class="big"><span id="sc">0</span><span style="font-size:1.4rem;color:var(--mute)"> / 8</span></div>
+    <div class="bar"><i id="barf"></i></div>
+    <div id="pct" style="font-weight:600"></div>
+    <div class="dots" id="dots"></div>
+    <p id="verdict" style="color:var(--mute);margin:0"></p>
+  </div>
+  <button class="btn" id="again" style="width:100%">다시 풀기</button>
+</section>
+</main>
+
+<script>
+var SIZE=5,stk=[],logEl=document.getElementById("log");
+function say(t){logEl.textContent=t}
+function drawStack(){
+  var h="";
+  for(var i=0;i<SIZE;i++){
+    var f=i<stk.length,t=i===stk.length-1;
+    h+='<div class="slot'+(f?' full':'')+(t?' top':'')+'"><small>['+i+']</small><span>'+(f?stk[i]:'')+'</span></div>';
+  }
+  document.getElementById("slots").innerHTML=h;
+  document.getElementById("state").textContent="top = "+(stk.length-1)+(stk.length===0?" (비어 있음)":stk.length===SIZE?" (가득 참)":"");
+}
+document.getElementById("bpush").onclick=function(){
+  if(stk.length===SIZE){say("스택이 가득 찼습니다.");return}
+  var v=(stk.length+1)*10;stk.push(v);drawStack();say("push("+v+"): top++ 후 stack[top] = "+v+" 저장");
+};
+document.getElementById("bpop").onclick=function(){
+  if(!stk.length){say("스택이 비어 있습니다.");return}
+  var v=stk.pop();drawStack();say(v+" 삭제 완료 (top-- 로 맨 위 데이터를 삭제 처리)");
+};
+document.getElementById("bpeek").onclick=function(){
+  if(!stk.length){say("스택이 비어 있습니다.");return}
+  say("가장 위에 있는 데이터 : "+stk[stk.length-1]+" (확인만 하고 삭제하지 않음)");
+};
+document.getElementById("bdisp").onclick=function(){
+  if(!stk.length){say("스택이 비어 있습니다.");return}
+  say("위에서부터 출력: "+stk.slice().reverse().join(" "));
+};
+document.getElementById("breset").onclick=function(){stk=[];drawStack();say("스택을 비웠습니다.")};
+drawStack();
+
+var CODE=[
+{t:"전체 코드",c:`#include <stdio.h> // printf() 함수를 사용하기 위한 헤더 파일
+#define SIZE 5 // 스택의 크기를 5로 설정
+int stack[SIZE]; // 크기가 5인 정수형 배열 선언
+int top = -1; // 스택의 가장 위쪽 위치를 나타내는 변수
+              // -1은 스택이 비어 있다는 의미
+
+// ======================================
+// 1. PUSH 함수 : 데이터 삽입하기
+// ======================================
+void push(int data) {
+  // top이 SIZE - 1이면 스택이 가득 찬 상태
+  if (top == SIZE - 1) {
+    printf("스택이 가득 찼습니다.\\n");
+  }
+  else {
+    top++; // top을 1 증가시킴
+    stack[top] = data; // 해당 위치에 데이터 저장
+  }
+}
+
+// ======================================
+// 2. POP 함수 : 데이터 삭제하기
+// ======================================
+void pop() {
+  // top이 -1이면 스택이 비어 있는 상태
+  if (top == -1) {
+    printf("스택이 비어 있습니다.\\n");
+  }
+  else {
+    // 가장 위에 있는 데이터 출력
+    printf("%d 삭제 완료\\n", stack[top]);
+    top--; // top을 1 감소시켜 데이터 삭제 처리
+  }
+}
+
+// ======================================
+// 3. PEEK 함수 : 가장 위의 데이터 확인하기
+// ======================================
+void peek() {
+  // 스택이 비어 있는지 확인
+  if (top == -1) {
+    printf("스택이 비어 있습니다.\\n");
+  }
+  else {
+    // stack[top]에 저장된 가장 위의 데이터 출력
+    // 데이터를 삭제하지는 않음
+    printf("가장 위에 있는 데이터 : %d\\n", stack[top]);
+  }
+}
+
+// ======================================
+// 4. DISPLAY 함수 : 데이터 출력하기
+// ======================================
+void display() {
+  int i; // 반복문에서 사용할 변수
+  // 스택이 비어 있는지 확인
+  if (top == -1) {
+    printf("스택이 비어 있습니다.\\n");
+  }
+  else {
+    // 가장 위에 있는 위치부터 0까지 반복
+    for (i = top; i >= 0; i--) {
+      // 배열에 저장된 데이터 출력
+      printf("%d ", stack[i]);
+    }
+    printf("\\n"); // 줄 바꿈
+  }
+}
+
+// ======================================
+// 5. MAIN 함수 : 프로그램 실행하기
+// ======================================
+int main() {
+  push(10); // 스택에 10 삽입
+  push(20); // 스택에 20 삽입
+  push(30); // 스택에 30 삽입
+  display(); // 스택에 저장된 데이터 출력
+  return 0; // 프로그램 정상 종료
+}`,
+ p:["PDF의 전체 소스 코드입니다. 옆으로 밀어서 긴 줄을 볼 수 있습니다.","실행 결과: <code>30 20 10</code>","위의 탭에서 함수별로 나누어 해설을 볼 수 있습니다."]},
+{t:"스택 선언",c:'#define SIZE 5   // 스택의 크기를 5로 설정\nint stack[SIZE]; // 크기가 5인 정수형 배열\nint top = -1;    // -1은 스택이 비어 있다는 의미',
+ p:["<code>SIZE</code>: 스택의 크기, 여기서는 5입니다.","<code>stack[SIZE]</code>: 데이터를 저장할 배열이며 인덱스는 0~4입니다.","<code>top = -1</code>: 처음에는 데이터가 없습니다."]},
+{t:"push",c:'void push(int data) {\n  if (top == SIZE - 1) {\n    printf("스택이 가득 찼습니다.\\n");\n  }\n  else {\n    top++;             // top을 1 증가\n    stack[top] = data; // 데이터 저장\n  }\n}',
+ p:["먼저 가득 찼는지 확인합니다 (<code>top == SIZE - 1</code>).","<code>top++</code>: top을 1 증가시킵니다.","<code>stack[top] = data</code>: 해당 위치에 데이터를 저장합니다."]},
+{t:"pop",c:'void pop() {\n  if (top == -1) {\n    printf("스택이 비어 있습니다.\\n");\n  }\n  else {\n    printf("%d 삭제 완료\\n", stack[top]);\n    top--; // top을 1 감소시켜 삭제 처리\n  }\n}',
+ p:["비어 있는지 확인합니다 (<code>top == -1</code>).","<code>stack[top]</code>: 가장 위에 있는 데이터입니다.","<code>top--</code>: top을 1 감소시킵니다. 배열의 값을 실제로 지우지는 않습니다."]},
+{t:"peek",c:'void peek() {\n  if (top == -1) {\n    printf("스택이 비어 있습니다.\\n");\n  }\n  else {\n    printf("가장 위에 있는 데이터 : %d\\n", stack[top]);\n  }\n}',
+ p:["<code>stack[top]</code>의 값을 출력합니다.","top은 변하지 않고 데이터도 삭제되지 않습니다."]},
+{t:"display",c:'void display() {\n  int i;\n  if (top == -1) {\n    printf("스택이 비어 있습니다.\\n");\n  }\n  else {\n    for (i = top; i >= 0; i--) {\n      printf("%d ", stack[i]);\n    }\n    printf("\\n");\n  }\n}',
+ p:["<code>i = top</code>에서 시작해 0까지 내려갑니다.","10, 20, 30을 넣었다면 <code>30 20 10</code>이 출력됩니다."]},
+{t:"main",c:'int main() {\n  push(10);\n  push(20);\n  push(30);\n  display(); // 30 20 10\n  return 0;\n}',
+ p:["10, 20, 30을 차례로 삽입하면 top은 2가 됩니다.","<code>display()</code>는 <code>30 20 10</code>을 출력합니다."]}
+];
+function hl(s){
+  s=s.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+  return s.split("\n").map(function(l){
+    var i=l.indexOf("//"),c="";
+    if(i>-1){c='<span class="cm">'+l.slice(i)+'</span>';l=l.slice(0,i)}
+    l=l.replace(/("[^"]*")/g,'<span class="s">$1</span>').replace(/\b(void|int|if|else|for|return|define)\b/g,'<span class="k">$1</span>').replace(/(\s|\(|\[|-)(\d+)(?=[\s\)\];,]|$)/g,'$1<span class="n">$2</span>');
+    return l+c;
+  }).join("\n");
+}
+var ct=document.getElementById("ctabs");
+function showCode(i){
+  [].forEach.call(ct.children,function(b,j){b.setAttribute("aria-selected",j===i)});
+  document.getElementById("codebox").innerHTML=hl(CODE[i].c);
+  document.getElementById("codeinfo").innerHTML='<ul class="pts"><li>'+CODE[i].p.join("</li><li>")+"</li></ul>";
+}
+CODE.forEach(function(c,i){var b=document.createElement("button");b.textContent=c.t;b.setAttribute("role","tab");b.onclick=function(){showCode(i)};ct.appendChild(b)});
+showCode(0);
+
+var Q=[
+{q:"push(10), push(20), push(30)을 실행한 뒤 display()를 실행하면 출력 결과는?",o:["10 20 30","30 20 10","20 30 10","30"],a:1,w:"display는 top부터 아래로 출력하므로 30 20 10입니다."},
+{q:"10, 20, 30을 삽입한 뒤 pop()을 실행하면 삭제되는 데이터는?",o:["10","20","30","전부"],a:2,w:"LIFO 구조이므로 가장 마지막에 들어간 30이 먼저 나옵니다."},
+{q:"스택이 비어 있을 때 top의 값은?",o:["0","1","-1","SIZE"],a:2,w:"인덱스가 0부터 시작하므로 비어 있음은 -1로 나타냅니다."},
+{q:"peek() 함수를 실행하면 데이터는 어떻게 될까?",o:["맨 위 데이터가 삭제된다","맨 위 데이터만 확인하고 삭제하지 않는다","스택 전체가 지워진다","새 데이터가 추가된다"],a:1,w:"peek은 stack[top]을 읽기만 합니다."},
+{q:"스택의 크기가 5일 때 스택이 가득 찬 상태의 top 값은?",o:["3","4","5","6"],a:1,w:"가득 찬 조건은 top == SIZE - 1이므로 4입니다."},
+{q:"10, 20, 30을 삽입하고 pop()을 한 번 실행했다. top의 값은?",o:["0","1","2","3"],a:1,w:"push 세 번 후 top은 2이고, pop에서 top--가 실행되어 1이 됩니다."},
+{q:"pop() 실행 후 배열은 어떻게 될까?",o:["값이 0으로 지워진다","top만 바뀌고 값은 배열에 남아 있다","배열 크기가 줄어든다","모든 데이터가 한 칸씩 이동한다"],a:1,w:"top--로 삭제된 것처럼 처리할 뿐 실제 값은 지우지 않습니다."},
+{q:"SIZE가 5이고 이미 5개가 들어 있을 때 push(60)을 실행하면 출력되는 것은?",o:["아무것도 출력되지 않고 추가된다","스택이 비어 있습니다.","스택이 가득 찼습니다.","프로그램이 종료된다"],a:2,w:"top == SIZE - 1이므로 가득 찼다는 메시지가 출력되고 데이터는 저장되지 않습니다."}
+];
+var ans=[];
+function drawQuiz(){
+  var h="";
+  Q.forEach(function(x,i){
+    h+='<div class="card q"><div class="qnum">문제 '+(i+1)+' / '+Q.length+'</div><h3>'+x.q+'</h3>';
+    x.o.forEach(function(o,j){
+      var cls="",d="";
+      if(ans[i]!==undefined){d=" disabled";if(j===x.a)cls=" ok";else if(j===ans[i])cls=" no"}
+      h+='<button class="opt'+cls+'"'+d+' data-q="'+i+'" data-o="'+j+'">'+o+'</button>';
+    });
+    if(ans[i]!==undefined)h+='<div class="why">'+(ans[i]===x.a?"정답입니다! +1점. ":"오답입니다. 0점. ")+x.w+"</div>";
+    h+="</div>";
+  });
+  document.getElementById("quiz").innerHTML=h;
+  drawScore();
+}
+function drawScore(){
+  var s=0,d="",n=0;
+  Q.forEach(function(x,i){
+    if(ans[i]===undefined)d+="<span>"+(i+1)+"</span>";
+    else{n++;if(ans[i]===x.a){s++;d+='<span class="y">'+(i+1)+"</span>"}else d+='<span class="x">'+(i+1)+"</span>"}
+  });
+  var p=Math.round(s/Q.length*100);
+  document.getElementById("sc").textContent=s;
+  document.getElementById("barf").style.width=p+"%";
+  document.getElementById("pct").textContent=p+"% · "+Q.length+"문제 중 "+n+"문제 풀이";
+  document.getElementById("dots").innerHTML=d;
+  var v=n<Q.length?"모든 문제를 풀면 최종 평가가 나타납니다.":p===100?"훌륭합니다! 각 기능에서 top이 어떻게 변하는지 정확히 이해하고 있습니다.":p>=75?"좋은 결과입니다. 틀린 문제를 다시 확인해 보세요.":p>=50?"기본은 이해했습니다. ‘작동 원리’와 ‘코드’ 부분을 다시 보세요.":"‘이론’과 ‘작동 원리’를 다시 학습한 뒤 도전해 보세요.";
+  document.getElementById("verdict").textContent=v;
+}
+document.getElementById("quiz").onclick=function(e){
+  var b=e.target.closest(".opt");if(!b)return;
+  var i=+b.dataset.q;if(ans[i]!==undefined)return;
+  ans[i]=+b.dataset.o;
+  var y=window.scrollY;drawQuiz();window.scrollTo(0,y);
+};
+document.getElementById("again").onclick=function(){ans=[];drawQuiz();document.getElementById("tasks").scrollIntoView()};
+drawQuiz();
+</script>
+</body>
+</html>
